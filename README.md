@@ -8,6 +8,14 @@ website Link : https://splendorous-dragon-ca5185.netlify.app/
 
 ![Image](https://github.com/user-attachments/assets/05c35d3c-01b8-4039-b56c-6a8a6f991f79)
 
+![Image](https://github.com/user-attachments/assets/fed49fcf-c4a5-437e-a41e-2bd4b5cf423c)
+
+![Image](https://github.com/user-attachments/assets/e0802c85-d7cb-406e-bdfd-3382c3035ba4)
+
+![Image](https://github.com/user-attachments/assets/8b864158-07ae-4b41-99e4-217190a9b4e9)
+
+![Image](https://github.com/user-attachments/assets/fb807819-5332-43e5-b16d-0715a1330ece)
+
 # Smart Home Management System
 
 ## Overview  
