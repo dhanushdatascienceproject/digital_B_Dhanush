@@ -1,4 +1,10 @@
-website Link : https://splendorous-dragon-ca5185.netlify.app/
+With Machine Learning Predictive Model website Link : https://67d54d622e4ca2d050654b2c--splendorous-dragon-ca5185.netlify.app/
+
+![Image](https://github.com/user-attachments/assets/2c4cf89d-579f-4881-a952-4a9bc63d5a13)
+
+![Image](https://github.com/user-attachments/assets/960ef327-4bed-403d-9340-ac318aca44cc)
+
+![Image](https://github.com/user-attachments/assets/d6aef986-8d39-4eb9-a902-260233ea56d5)
 
 ![Image](https://github.com/user-attachments/assets/0a405a1f-fa20-4bc2-b070-6ac21b58efa6)
 
