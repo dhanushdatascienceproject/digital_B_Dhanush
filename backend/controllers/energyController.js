@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const Device = require('../models/deviceModel');
 const EnergyData = require('../models/energyDataModel');
 
@@ -35,15 +37,13 @@ const postEnergyData = async (req, res) => {
   try {
     const { deviceId, wattage, duration } = req.body;
     
-    // Check if device exists
     const device = await Device.findById(deviceId);
     if (!device) {
       return res.status(404).json({ message: 'Device not found' });
     }
     
-    // Calculate kWh and estimated cost (assuming $0.15 per kWh)
-    const totalEnergy = (wattage * duration) / (1000 * 60); // Convert to kWh
-    const cost = totalEnergy * 0.15; // Assuming $0.15 per kWh
+    const totalEnergy = (wattage * duration) / (1000 * 60);
+    const cost = totalEnergy * 0.15;
     
     const energyData = new EnergyData({
       device: deviceId,
@@ -64,7 +64,7 @@ const postEnergyData = async (req, res) => {
 const getDeviceEnergyData = async (req, res) => {
   try {
     const { deviceId } = req.params;
-    const { period } = req.query; // 'day', 'week', 'month'
+    const { period } = req.query;
     
     let startDate;
     const endDate = new Date();
@@ -101,8 +101,7 @@ const getDeviceEnergyData = async (req, res) => {
 // Get total energy usage
 const getTotalEnergy = async (req, res) => {
   try {
-    const { period } = req.query; // 'day', 'week', 'month'
-    
+    const { period } = req.query;
     let startDate;
     const endDate = new Date();
     
@@ -125,25 +124,11 @@ const getTotalEnergy = async (req, res) => {
     }
     
     const result = await EnergyData.aggregate([
-      {
-        $match: {
-          timestamp: { $gte: startDate, $lte: endDate },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          totalEnergy: { $sum: '$totalEnergy' },
-          totalCost: { $sum: '$cost' },
-        },
-      },
+      { $match: { timestamp: { $gte: startDate, $lte: endDate } } },
+      { $group: { _id: null, totalEnergy: { $sum: '$totalEnergy' }, totalCost: { $sum: '$cost' } } },
     ]);
     
-    if (result.length === 0) {
-      return res.json({ totalEnergy: 0, totalCost: 0 });
-    }
-    
-    res.json(result[0]);
+    res.json(result.length ? result[0] : { totalEnergy: 0, totalCost: 0 });
   } catch (error) {
     res.status(500).json({ message: 'Server Error' });
   }
@@ -152,8 +137,7 @@ const getTotalEnergy = async (req, res) => {
 // Get energy usage by device type
 const getEnergyByDeviceType = async (req, res) => {
   try {
-    const { period } = req.query; // 'day', 'week', 'month'
-    
+    const { period } = req.query;
     let startDate;
     const endDate = new Date();
     
@@ -176,43 +160,36 @@ const getEnergyByDeviceType = async (req, res) => {
     }
     
     const result = await EnergyData.aggregate([
-      {
-        $match: {
-          timestamp: { $gte: startDate, $lte: endDate },
-        },
-      },
-      {
-        $lookup: {
-          from: 'devices',
-          localField: 'device',
-          foreignField: '_id',
-          as: 'deviceInfo',
-        },
-      },
-      {
-        $unwind: '$deviceInfo',
-      },
-      {
-        $group: {
-          _id: '$deviceInfo.type',
-          totalEnergy: { $sum: '$totalEnergy' },
-          totalCost: { $sum: '$cost' },
-        },
-      },
-      {
-        $project: {
-          type: '$_id',
-          totalEnergy: 1,
-          totalCost: 1,
-          _id: 0,
-        },
-      },
+      { $match: { timestamp: { $gte: startDate, $lte: endDate } } },
+      { $lookup: { from: 'devices', localField: 'device', foreignField: '_id', as: 'deviceInfo' } },
+      { $unwind: '$deviceInfo' },
+      { $group: { _id: '$deviceInfo.type', totalEnergy: { $sum: '$totalEnergy' }, totalCost: { $sum: '$cost' } } },
+      { $project: { type: '$_id', totalEnergy: 1, totalCost: 1, _id: 0 } },
     ]);
     
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: 'Server Error' });
   }
+};
+
+// Get historical energy data from a file
+const getHistoricalEnergy = (req, res) => {
+  const filePath = path.join(__dirname, '../ml/historical_data.csv');
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) return res.status(500).json({ error: 'Error reading historical data' });
+    res.json({ historicalData: data });
+  });
+};
+
+// Get predicted energy usage
+const getPredictedEnergy = (req, res) => {
+  const predictedData = [
+    { type: 'light', totalEnergy: 12.3, totalCost: 3.1 },
+    { type: 'hvac', totalEnergy: 22.5, totalCost: 6.2 },
+    { type: 'appliance', totalEnergy: 16.8, totalCost: 4.8 }
+  ];
+  res.json(predictedData);
 };
 
 module.exports = {
@@ -222,4 +199,6 @@ module.exports = {
   getDeviceEnergyData,
   getTotalEnergy,
   getEnergyByDeviceType,
+  getHistoricalEnergy,
+  getPredictedEnergy,
 };
